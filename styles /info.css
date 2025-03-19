@@ -1,0 +1,131 @@
+/* Estilos específicos para a página de informações */
+
+.info-header {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.app-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.info-content {
+    background-color: rgba(13, 20, 38, 0.85);
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: var(--shadow);
+}
+
+.intro-section, .about-section, .alphabet-section, .usage-section {
+    margin-bottom: 40px;
+}
+
+.intro-section p, .about-section p, .usage-section p {
+    margin-bottom: 15px;
+    text-align: justify;
+}
+
+.alphabet-table {
+    margin: 20px 0;
+    border-radius: 10px;
+    overflow: hidden;
+    background-color: rgba(26, 35, 126, 0.4);
+}
+
+.alphabet-header, .alphabet-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 2fr;
+    text-align: center;
+}
+
+.alphabet-header {
+    background-color: rgba(26, 35, 126, 0.7);
+    padding: 12px 10px;
+    font-weight: bold;
+}
+
+.alphabet-row {
+    padding: 10px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.alphabet-row:last-child {
+    border-bottom: none;
+}
+
+.alphabet-row .magic-font {
+    font-size: 1.5rem;
+}
+
+.usage-section ol {
+    margin-left: 25px;
+    margin-bottom: 20px;
+}
+
+.usage-section li {
+    margin-bottom: 10px;
+}
+
+.actions {
+    display: flex;
+    justify-content: center;
+    margin-top: 30px;
+}
+
+.back-button {
+    padding: 12px 25px;
+    background-color: var(--accent);
+    color: #333;
+    border: none;
+    border-radius: 5px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.2s;
+}
+
+.back-button:hover {
+    background-color: var(--accent-dark);
+    transform: translateY(-2px);
+}
+
+.back-button:active {
+    transform: translateY(1px);
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .info-content {
+        padding: 20px;
+    }
+    
+    .alphabet-row .magic-font {
+        font-size: 1.3rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .info-header {
+        flex-direction: column;
+        gap: 10px;
+        text-align: center;
+    }
+    
+    .info-content {
+        padding: 15px;
+    }
+    
+    .alphabet-header, .alphabet-row {
+        grid-template-columns: 1fr 1fr 1.5fr;
+        font-size: 0.9rem;
+    }
+    
+    .alphabet-row .magic-font {
+        font-size: 1.2rem;
+    }
+}

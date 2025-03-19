@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Informações - Tradutor de Língua Mágica</title>
+    
+    <!-- PyScript -->
+    <link rel="stylesheet" href="https://pyscript.net/latest/pyscript.css" />
+    <script defer src="https://pyscript.net/latest/pyscript.js"></script>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Deseret&display=swap" rel="stylesheet">
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="styles/main.css">
+    <link rel="stylesheet" href="styles/info.css">
+    
+    <!-- PyScript Environment -->
+    <py-config>
+        [[fetch]]
+        files = ["python/translator.py"]
+    </py-config>
+</head>
+<body class="info-page">
+    <div class="container">
+        <header class="info-header">
+            <img src="assets/icon.png" alt="Ícone do Tradutor Mágico" class="app-icon">
+            <h1>Segredos dos Arcanos</h1>
+        </header>
+
+        <main class="info-content">
+            <section class="intro-section">
+                <h2>O Tradutor de Língua Mágica</h2>
+                <p>
+                    O Tradutor de Língua Mágica é baseado no livro 'Os Segredos dos Arcanos'.
+                </p>
+                <p>
+                    No universo do livro, os magos desenvolveram uma língua própria com símbolos e 
+                    fonemas específicos que possuem ligação com a essência do caos e da magia.
+                </p>
+                <p>
+                    A tradução trabalha com um processo preciso de inversão de sílabas e substituição 
+                    de letras por símbolos mágicos e seus fonemas correspondentes.
+                </p>
+            </section>
+
+            <section class="alphabet-section">
+                <h2>Alfabeto Mágico</h2>
+                <div class="alphabet-table">
+                    <div class="alphabet-header">
+                        <div>Letra</div>
+                        <div>Símbolo</div>
+                        <div>Fonema</div>
+                    </div>
+                    <div id="alphabetTable" class="alphabet-content">
+                        <!-- Será preenchido pelo código Python -->
+                    </div>
+                </div>
+            </section>
+
+            <section class="about-section">
+                <h2>Sobre o Livro</h2>
+                <p>
+                    "Os Segredos dos Arcanos" é um livro de fantasia onde o protagonista descobre 
+                    um método para traduzir frases do latim para a língua mágica dos antigos, abrindo 
+                    portas para um mundo de magia e mistérios.
+                </p>
+                <p>
+                    Este aplicativo é uma ferramenta que permite aos leitores experimentar a tradução 
+                    mágica mencionada no livro.
+                </p>
+            </section>
+
+            <section class="usage-section">
+                <h2>Como Usar o Tradutor</h2>
+                <ol>
+                    <li><strong>Escolha o Modo:</strong> Selecione se deseja traduzir de Latim para Mágico ou de Mágico para Latim.</li>
+                    <li><strong>Digite o Texto:</strong> Insira o texto que deseja traduzir no campo apropriado.</li>
+                    <li><strong>Clique em "Converter":</strong> O texto será processado e os resultados aparecerão nos campos abaixo.</li>
+                    <li><strong>Visualize os Resultados:</strong> Veja a tradução, o método usado e a pronúncia fonética.</li>
+                    <li><strong>Copie ou Compartilhe:</strong> Use os botões "Copiar" para copiar o resultado para a área de transferência.</li>
+                </ol>
+                <p>
+                    <strong>Dica:</strong> No modo "Mágico para Latim", utilize o teclado virtual para inserir os símbolos mágicos corretamente.
+                </p>
+            </section>
+
+            <div class="actions">
+                <button id="backButton" class="back-button">Voltar para o Tradutor</button>
+            </div>
+        </main>
+    </div>
+
+    <!-- Python Script -->
+    <py-script>
+        import js
+        from python.translator import MAGIC_ALPHABET
+        
+        def preencher_tabela_alfabeto():
+            """Preenche a tabela do alfabeto com os símbolos mágicos"""
+            tabela_alfabeto = js.document.getElementById('alphabetTable')
+            
+            for letra, (simbolo, fonema) in sorted(MAGIC_ALPHABET.items()):
+                linha = js.document.createElement('div')
+                linha.className = 'alphabet-row'
+                
+                celula_letra = js.document.createElement('div')
+                celula_letra.textContent = letra
+                
+                celula_simbolo = js.document.createElement('div')
+                celula_simbolo.className = 'magic-font'
+                celula_simbolo.textContent = simbolo
+                
+                celula_fonema = js.document.createElement('div')
+                celula_fonema.textContent = fonema
+                
+                linha.appendChild(celula_letra)
+                linha.appendChild(celula_simbolo)
+                linha.appendChild(celula_fonema)
+                
+                tabela_alfabeto.appendChild(linha)
+        
+        # Inicialização
+        def inicializar():
+            preencher_tabela_alfabeto()
+            
+            # Configurar botão de voltar
+            js.document.getElementById('backButton').addEventListener('click', lambda e: js.window.location.href = 'index.html')
+        
+        # Chamar inicialização quando o documento estiver pronto
+        js.document.addEventListener('DOMContentLoaded', lambda e: inicializar())
+    </py-script>
+</body>
+</html>

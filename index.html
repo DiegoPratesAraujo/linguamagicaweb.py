@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tradutor de Língua Mágica</title>
+    
+    <!-- PyScript -->
+    <link rel="stylesheet" href="https://pyscript.net/latest/pyscript.css" />
+    <script defer src="https://pyscript.net/latest/pyscript.js"></script>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Deseret&display=swap" rel="stylesheet">
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="styles/main.css">
+    
+    <!-- PyScript Environment -->
+    <py-config>
+        packages = ["pyphen"]
+        
+        [[fetch]]
+        files = ["python/translator.py", "python/hyphenator.py"]
+    </py-config>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1 class="magic-font">Tradutor Mágico</h1>
+            <button id="infoButton" class="info-button">INFO</button>
+        </header>
+
+        <main>
+            <section class="input-section">
+                <h2 id="inputLabel">Digite a frase em Latim:</h2>
+                <div class="input-container">
+                    <textarea id="inputText" rows="4" placeholder="Digite seu texto aqui..."></textarea>
+                    <div class="button-row">
+                        <button id="pasteButton" class="action-button">Colar</button>
+                        <button id="clearButton" class="action-button">Limpar</button>
+                        <button id="keyboardButton" class="action-button hidden">Teclado</button>
+                    </div>
+                </div>
+            </section>
+
+            <section class="mode-section">
+                <select id="modeSelector" class="mode-selector">
+                    <option value="latin-to-magic">Latim → Mágico</option>
+                    <option value="magic-to-latin">Mágico → Latim</option>
+                </select>
+                <button id="convertButton" class="convert-button magic-font">Converter</button>
+            </section>
+
+            <section class="output-section">
+                <div class="output-container">
+                    <h2 id="outputMagicLabel">Língua Mágica:</h2>
+                    <textarea id="outputMagic" rows="4" readonly></textarea>
+                    <button class="copy-button" data-target="outputMagic">Copiar</button>
+                </div>
+                
+                <div class="output-container">
+                    <h2 id="outputMethodLabel">Método de Conversão:</h2>
+                    <textarea id="outputMethod" rows="4" readonly></textarea>
+                    <button class="copy-button" data-target="outputMethod">Copiar</button>
+                </div>
+                
+                <div class="output-container">
+                    <h2 id="outputPronunciationLabel">Pronúncia Fonética:</h2>
+                    <textarea id="outputPronunciation" rows="4" readonly></textarea>
+                    <button class="copy-button" data-target="outputPronunciation">Copiar</button>
+                </div>
+            </section>
+
+            <section class="font-size-section">
+                <h2>Tamanho da Letra:</h2>
+                <input type="range" id="fontSizeSlider" min="14" max="48" value="24">
+            </section>
+
+            <section class="example-section">
+                <p id="randomSentence" class="magic-font">Olá meu nome é Alice</p>
+            </section>
+
+            <section class="alphabet-section">
+                <h2>Alfabeto Mágico:</h2>
+                <div id="alphabetGrid" class="alphabet-grid">
+                    <!-- Será preenchido via JavaScript e Python -->
+                </div>
+            </section>
+        </main>
+
+        <!-- Teclado virtual -->
+        <div id="virtualKeyboard" class="virtual-keyboard hidden">
+            <div class="keyboard-header">
+                <h3 class="magic-font">Teclado da Língua Mágica</h3>
+                <button id="closeKeyboard" class="close-button">✕</button>
+            </div>
+            <div class="keyboard-grid" id="keyboardGrid">
+                <!-- Será preenchido via JavaScript e Python -->
+            </div>
+            <div class="punctuation-section">
+                <h4 class="punctuation-title">Pontuação</h4>
+                <div class="punctuation-grid" id="punctuationGrid">
+                    <!-- Será preenchido via JavaScript -->
+                </div>
+            </div>
+            <div class="keyboard-actions">
+                <button id="keyboardBackspace" class="keyboard-action">Apagar</button>
+                <button id="keyboardSpace" class="keyboard-action">Espaço</button>
+            </div>
+        </div>
+
+        <!-- Popup de feedback para cópia -->
+        <div id="feedbackPopup" class="feedback-popup hidden">
+            <p>Copiado para a área de transferência!</p>
+        </div>
+    </div>
+
+    <!-- Python Code -->
+    <py-script>
+        import js
+        from python.translator import MAGIC_ALPHABET, latim_para_magico, magico_para_latim
+
+        # =====================================
+        # Funções para integrar com JavaScript
+        # =====================================
+        
+        def converter_texto():
+            modo = js.document.getElementById('modeSelector').value
+            texto = js.document.getElementById('inputText').value.strip()
+            
+            if not texto:
+                js.document.getElementById('outputMagic').value = "Por favor, insira uma frase."
+                js.document.getElementById('outputMethod').value = "Por favor, insira uma frase."
+                js.document.getElementById('outputPronunciation').value = "Por favor, insira uma frase."
+                return
+            
+            # Verifica se há delimitadores para múltiplas frases
+            if '|' in texto:
+                frases = [s.strip() for s in texto.split('|') if s.strip()]
+            else:
+                # Divide por pontuação final e espaço
+                import re
+                frases = re.split(r'(?<=[.!?…])\s+', texto)
+                frases = [s for s in frases if s.strip()]
+            
+            if len(frases) > 1:
+                if modo == "latin-to-magic":
+                    resultados_magicos = []
+                    resultados_fonemas = []
+                    resultados_metodos = []
+                    
+                    for frase in frases:
+                        frase = frase.strip()
+                        if frase:
+                            frase_magica, frase_fonemas, descricao_processo = latim_para_magico(frase)
+                            resultados_magicos.append(frase_magica)
+                            resultados_fonemas.append(frase_fonemas)
+                            resultados_metodos.append(descricao_processo)
+                    
+                    js.document.getElementById('outputMagic').value = " | ".join(resultados_magicos)
+                    js.document.getElementById('outputPronunciation').value = " | ".join(resultados_fonemas)
+                    js.document.getElementById('outputMethod').value = " | ".join(resultados_metodos)
+                else:
+                    resultados_latim = []
+                    resultados_metodos = []
+                    
+                    for frase in frases:
+                        frase = frase.strip()
+                        if frase:
+                            frase_latim, descricao_processo = magico_para_latim(frase)
+                            resultados_latim.append(frase_latim)
+                            resultados_metodos.append(descricao_processo)
+                    
+                    resultado_final = " | ".join(resultados_latim).replace("|", ".")
+                    metodo_final = " | ".join(resultados_metodos).replace("|", ".")
+                    
+                    js.document.getElementById('outputMagic').value = resultado_final
+                    js.document.getElementById('outputMethod').value = metodo_final
+                    js.document.getElementById('outputPronunciation').value = "Pronúncia não disponível para tradução de Mágico para Latim."
+            else:
+                # Processamento para frase única
+                if modo == "latin-to-magic":
+                    frase_magica, frase_fonemas, descricao_processo = latim_para_magico(texto)
+                    js.document.getElementById('outputMagic').value = frase_magica
+                    js.document.getElementById('outputPronunciation').value = frase_fonemas
+                    js.document.getElementById('outputMethod').value = descricao_processo
+                else:
+                    frase_latim, descricao_processo = magico_para_latim(texto)
+                    js.document.getElementById('outputMagic').value = frase_latim.replace("|", ".")
+                    js.document.getElementById('outputMethod').value = descricao_processo.replace("|", ".")
+                    js.document.getElementById('outputPronunciation').value = "Pronúncia não disponível para tradução de Mágico para Latim."
+        
+        def preencher_alfabeto():
+            """Preenche a grade do alfabeto com os símbolos mágicos"""
+            alfabeto_grid = js.document.getElementById('alphabetGrid')
+            alfabeto_grid.innerHTML = ''  # Limpa o conteúdo existente
+            
+            for letra, (simbolo, fonema) in sorted(MAGIC_ALPHABET.items()):
+                item_div = js.document.createElement('div')
+                item_div.className = 'alphabet-item'
+                
+                simbolo_div = js.document.createElement('div')
+                simbolo_div.className = 'alphabet-symbol magic-font'
+                simbolo_div.textContent = simbolo
+                
+                info_div = js.document.createElement('div')
+                info_div.className = 'alphabet-info'
+                info_div.textContent = f"{letra} ({fonema})"
+                
+                item_div.appendChild(simbolo_div)
+                item_div.appendChild(info_div)
+                alfabeto_grid.appendChild(item_div)
+        
+        def preencher_teclado():
+            """Preenche a grade do teclado virtual com os símbolos mágicos"""
+            teclado_grid = js.document.getElementById('keyboardGrid')
+            teclado_grid.innerHTML = ''  # Limpa o conteúdo existente
+            
+            for letra, (simbolo, fonema) in sorted(MAGIC_ALPHABET.items()):
+                container = js.document.createElement('div')
+                container.className = 'key-container'
+                
+                botao = js.document.createElement('button')
+                botao.className = 'key'
+                botao.textContent = simbolo
+                botao.setAttribute('data-symbol', simbolo)
+                
+                label = js.document.createElement('span')
+                label.className = 'key-label'
+                label.textContent = f"{letra} ({fonema})"
+                
+                container.appendChild(botao)
+                container.appendChild(label)
+                teclado_grid.appendChild(container)
+            
+            # Preenche a grade de pontuação
+            pontuacao_grid = js.document.getElementById('punctuationGrid')
+            pontuacao_grid.innerHTML = ''  # Limpa o conteúdo existente
+            
+            pontuacoes = [".", ",", "!", "?", ":", ";", "-", "\"", "\\", "(", ")", "[", "]"]
+            for p in pontuacoes:
+                botao = js.document.createElement('button')
+                botao.className = 'punct-key'
+                botao.textContent = p
+                botao.setAttribute('data-symbol', p)
+                pontuacao_grid.appendChild(botao)
+        
+        # Inicializa a interface
+        def inicializar():
+            preencher_alfabeto()
+            preencher_teclado()
+            
+            # Conecta o botão converter à função Python
+            js.document.getElementById('convertButton').addEventListener('click', lambda e: converter_texto())
+        
+        # Chama a inicialização quando o documento estiver pronto
+        js.document.addEventListener('DOMContentLoaded', lambda e: inicializar())
+    </py-script>
+    
+    <!-- JavaScript for UI interactions -->
+    <script src="scripts/ui.js"></script>
+    <script src="scripts/keyboard.js"></script>
+</body>
+</html>
